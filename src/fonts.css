@@ -1,0 +1,56 @@
+/* Lufga Font Family */
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-semibold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-extrabold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lufga';
+    src: url('/src/assets/fonts/Fontspring-DEMO-lufga-thin.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+}

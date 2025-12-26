@@ -1,0 +1,303 @@
+:root {
+    --heatmap-level-0: rgba(255, 255, 255, 0.08);
+    --heatmap-level-1: rgba(0, 212, 255, 0.3);
+    --heatmap-level-2: rgba(0, 212, 255, 0.5);
+    --heatmap-level-3: rgba(0, 212, 255, 0.75);
+    --heatmap-level-4: rgba(0, 212, 255, 1);
+}
+
+.heatmap-container {
+    width: 100%;
+    padding: var(--spacing-lg);
+    font-family: var(--font-body);
+}
+
+.heatmap-container.github-style {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.heatmap-wrapper {
+    display: inline-block;
+    min-width: 100%;
+}
+
+/* Month Labels */
+.month-labels {
+    display: grid;
+    grid-template-columns: 30px repeat(auto-fill, 11px);
+    gap: 3px;
+    margin-bottom: 8px;
+    padding-left: 0;
+}
+
+.day-label-spacer {
+    width: 30px;
+}
+
+.month-label {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Grid Structure */
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0;
+    position: relative;
+}
+
+.day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    margin-right: -1px;
+    background-color: #132636;
+}
+
+.day-label {
+    height: 15px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-weight: 500;
+}
+
+/* Cells Grid */
+.heatmap-cells {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.heatmap-row {
+    display: flex;
+    gap: 3px;
+}
+
+.heatmap-cell {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: 1px solid rgba(0, 0, 0, 0.1);
+    outline-offset: -1px;
+    box-shadow: none;
+}
+
+.heatmap-cell:hover {
+    outline: 2px solid rgba(0, 212, 255, 0.8);
+    outline-offset: 1px;
+    transform: scale(1.5);
+    z-index: 100;
+    border-radius: 3px;
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+.heatmap-cell.empty {
+    opacity: 0.4;
+}
+
+/* Tooltip */
+.heatmap-tooltip {
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 14, 26, 0.98);
+    color: white;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(0, 212, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    font-family: var(--font-body);
+}
+
+.heatmap-tooltip.github-tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+}
+
+.heatmap-tooltip.github-tooltip strong {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 13px;
+}
+
+.heatmap-tooltip.github-tooltip span {
+    font-size: 11px;
+    opacity: 0.85;
+    font-weight: 400;
+}
+
+.heatmap-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(10, 14, 26, 0.98);
+}
+
+/* Legend */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: flex-end;
+    margin-top: var(--spacing-md);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    padding-right: 0;
+    font-weight: 500;
+}
+
+.heatmap-legend.github-legend {
+    padding-left: 34px;
+}
+
+.legend-text {
+    font-size: 12px;
+    margin: 0 6px;
+    font-weight: 500;
+}
+
+.legend-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    outline: 1px solid rgba(0, 0, 0, 0.15);
+    outline-offset: -1px;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.legend-cell:hover {
+    transform: scale(1.3);
+}
+
+/* Hourly Heatmap - Compact & Readable */
+.heatmap-grid-hourly {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: var(--spacing-sm);
+    max-width: 100%;
+}
+
+.heatmap-hour-cell {
+    position: relative;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base) var(--ease-out);
+    backdrop-filter: blur(10px);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.heatmap-hour-cell:hover {
+    transform: translateY(-4px) scale(1.03);
+    border-color: var(--color-primary);
+    box-shadow:
+        0 8px 16px rgba(0, 212, 255, 0.3),
+        0 0 30px rgba(0, 212, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.hour-label {
+    font-size: 0.65rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-body);
+}
+
+.hour-count {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    line-height: 1;
+}
+
+@media (max-width: 768px) {
+    .heatmap-container {
+        padding: var(--spacing-sm);
+    }
+
+    .heatmap-container.github-style {
+        overflow-x: auto;
+        /* Ensure scrolling doesn't hide sticky */
+        padding-left: 0;
+    }
+
+    .month-labels {
+        margin-left: 30px;
+        /* Align with grid content */
+        grid-template-columns: repeat(auto-fill, 11px);
+        /* Remove spacer col from grid definition if handling manually, or keep */
+        grid-template-columns: 0px repeat(auto-fill, 11px);
+        /* Hack to align with 40px offset */
+        display: flex;
+        /* Easier alignment */
+        gap: 0;
+        position: relative;
+    }
+
+    .month-labels {
+        display: grid;
+        grid-template-columns: 30px repeat(auto-fill, 11px);
+    }
+
+    .heatmap-grid-hourly {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 6px;
+    }
+
+    .heatmap-hour-cell {
+        padding: 8px;
+        min-height: 60px;
+        border-radius: var(--radius-md);
+    }
+
+    .hour-count {
+        font-size: 1.25rem;
+    }
+
+    .hour-label {
+        font-size: 0.6rem;
+    }
+}

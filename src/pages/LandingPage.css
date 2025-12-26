@@ -1,0 +1,166 @@
+.landing-page-content {
+    max-width: 100%;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    position: relative;
+}
+
+/* Top Section - Profile and Year */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    animation: fadeInDown 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.channel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.channel-name {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.channel-handle {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    font-weight: 400;
+}
+
+/* Main Title Section */
+.recap-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 0.85;
+    margin-bottom: var(--spacing-lg);
+    animation: fadeInUp 0.8s 0.2s cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.year {
+    font-size: clamp(4rem, 15vw, 10rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--color-primary) 50%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    font-family: 'Lufga', sans-serif;
+}
+
+.recap-text {
+    font-size: clamp(4rem, 15vw, 10rem);
+    font-weight: 900;
+    color: var(--color-text-primary);
+    margin: 0;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    font-family: 'Lufga', sans-serif;
+}
+
+/* Tagline */
+.tagline {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto var(--spacing-xl);
+    font-weight: 400;
+    animation: fadeIn 0.8s 0.4s cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.highlight {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Button positioned at bottom */
+.landing-page-content>button {
+    margin-top: auto;
+    animation: fadeInUp 0.8s 0.6s cubic-bezier(0.33, 1, 0.68, 1) backwards;
+}
+
+@media (max-width: 768px) {
+    .landing-page-content {
+        padding: var(--spacing-xl) var(--spacing-md);
+    }
+
+    .year,
+    .recap-text {
+        font-size: clamp(3rem, 12vw, 5rem);
+    }
+
+    .channel-name {
+        font-size: var(--font-size-xl);
+    }
+
+    .tagline {
+        font-size: var(--font-size-base);
+    }
+}
+
+@media (max-width: 480px) {
+
+    .year,
+    .recap-text {
+        font-size: clamp(2.5rem, 15vw, 4rem);
+        line-height: 0.9;
+    }
+
+    .landing-page-content {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .profile-section {
+        margin-bottom: var(--spacing-xl);
+    }
+}

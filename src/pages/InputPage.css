@@ -1,0 +1,213 @@
+.input-page-content {
+    max-width: 600px;
+    width: 100%;
+    text-align: left;
+    animation: fadeInScale 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.branding {
+    margin-bottom: var(--spacing-2xl);
+    position: relative;
+}
+
+.branding::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+    filter: blur(50px);
+    animation: float 8s ease-in-out infinite;
+}
+
+.main-title {
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 900;
+    line-height: 0.9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    letter-spacing: -0.04em;
+    position: relative;
+    font-family: 'Lufga', sans-serif;
+}
+
+.telegram-text {
+    color: var(--color-text-primary);
+    font-size: 3rem;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+    animation: textGlow 3s ease-in-out infinite;
+    font-weight: 500;
+}
+
+@keyframes textGlow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+    }
+
+    50% {
+        text-shadow: 0 0 80px rgba(0, 212, 255, 0.4);
+    }
+}
+
+.unwrapped-text {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: var(--font-size-base);
+    letter-spacing: 0.2em;
+    font-weight: lighter;
+    margin-top: -0.5rem;
+    position: relative;
+}
+
+.unwrapped-text::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    filter: blur(20px);
+    opacity: 0.5;
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    align-items: center;
+    width: 100%;
+}
+
+.form-group {
+    width: 100%;
+    text-align: left;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+}
+
+.error-message {
+    margin-top: var(--spacing-xs);
+    color: #ef4444;
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: shake 0.4s ease-in-out;
+    font-weight: 500;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+.info-text {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 400;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--spacing-xs);
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.info-text:hover .info-icon {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(1.1) rotate(5deg);
+}
+
+@media (max-width: 768px) {
+    .main-title {
+        font-size: clamp(3rem, 10vw, 4.5rem);
+    }
+
+    .telegram-text {
+        font-size: clamp(3rem, 10vw, 4.5rem);
+    }
+
+    .unwrapped-text {
+        font-size: var(--font-size-base);
+        letter-spacing: 0.2em;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-page-content {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .main-title,
+    .telegram-text {
+        font-size: clamp(2.5rem, 15vw, 3.5rem);
+        letter-spacing: normal;
+    }
+
+    .branding::before {
+        width: 150px;
+        height: 150px;
+        top: -20px;
+    }
+
+    .input-form {
+        gap: var(--spacing-md);
+    }
+}
