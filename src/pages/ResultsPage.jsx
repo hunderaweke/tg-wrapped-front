@@ -6,6 +6,44 @@ import MonthlyChart from "../components/MonthlyChart";
 import { API_BASE_URL } from "../services/api";
 import "./ResultsPage.css";
 
+// Format large numbers with K, M, B suffixes
+const formatLargeNumber = (num) => {
+  if (num >= 1_000_000_000) {
+    return (num / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  }
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (num >= 100_000) {
+    return (num / 1_000).toFixed(0) + "K";
+  }
+  if (num >= 10_000) {
+    return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  }
+  return num.toLocaleString();
+};
+
+// Check if number is abbreviated
+const isAbbreviated = (num) => num >= 10_000;
+
+// Component for numbers with tooltips
+const NumberWithTooltip = ({ value, suffix = "" }) => {
+  const formatted = formatLargeNumber(value);
+  const showTooltip = isAbbreviated(value);
+  const exact = value.toLocaleString();
+
+  return (
+    <span
+      className="number-with-tooltip"
+      title={showTooltip ? `Exact: ${exact}` : undefined}
+    >
+      {formatted}
+      {suffix}
+      {showTooltip && <span className="exact-tooltip">{exact}</span>}
+    </span>
+  );
+};
+
 const ResultsPage = ({ data }) => {
   const { channel_name, channel_profile, totals, trends, highlights } = data;
 
@@ -39,7 +77,12 @@ const ResultsPage = ({ data }) => {
 
         {/* Total Stats Grid */}
         <section className="stats-section">
-          <h2 className="section-title">Overall Performance</h2>
+          <div className="section-header">
+            <h2 className="section-title">📈 Overall Performance</h2>
+            <p className="section-description">
+              Your channel's key metrics at a glance
+            </p>
+          </div>
           <div className="stats-grid">
             <StatCard
               title="Total Views"
@@ -70,50 +113,74 @@ const ResultsPage = ({ data }) => {
 
         {/* Posting Activity Heat Map */}
         <section className="visualization-section glass-card">
-          <h2 className="section-title">Daily Posting Activity</h2>
-          <p className="section-subtitle">
-            Your posting patterns throughout the year
-          </p>
+          <div className="section-header">
+            <h2 className="section-title">📅 Daily Posting Activity</h2>
+            <p className="section-description">
+              Track your content creation journey throughout 2025
+            </p>
+          </div>
           <HeatMap data={trends.posts_by_day} type="daily" />
         </section>
 
         {/* Monthly Views Chart */}
         <section className="visualization-section glass-card">
+          <div className="section-header">
+            <h2 className="section-title">👁️ Monthly View Trends</h2>
+            <p className="section-description">
+              See how your audience engagement evolved each month
+            </p>
+          </div>
           <MonthlyChart
             data={trends.views_by_month}
-            title="Views by Month"
+            title="Monthly Views Distribution"
             type="views"
           />
         </section>
 
         {/* Monthly Posts Chart */}
         <section className="visualization-section glass-card">
+          <div className="section-header">
+            <h2 className="section-title">📊 Monthly Post Volume</h2>
+            <p className="section-description">
+              Your content creation frequency across the year
+            </p>
+          </div>
           <MonthlyChart
             data={trends.posts_by_month}
-            title="Posts by Month"
+            title="Monthly Posts Distribution"
             type="posts"
           />
         </section>
 
         {/* Hourly Posting Pattern */}
         <section className="visualization-section glass-card">
-          <h2 className="section-title">Posting Schedule</h2>
-          <p className="section-subtitle">
-            When you're most active (hours of the day)
-          </p>
+          <div className="section-header">
+            <h2 className="section-title">⏰ Peak Activity Hours</h2>
+            <p className="section-description">
+              Discover your optimal posting times throughout the day
+            </p>
+          </div>
           <HeatMap data={trends.posts_by_hour} type="hourly" />
         </section>
 
         {/* Highlights */}
         <section className="highlights-section">
-          <h2 className="section-title">Highlights</h2>
+          <div className="section-header">
+            <h2 className="section-title">✨ Channel Highlights</h2>
+            <p className="section-description">
+              Your standout achievements and milestones
+            </p>
+          </div>
           <div className="highlights-grid">
             <div className="highlight-card glass-card">
               <div className="highlight-icon">🏆</div>
               <div className="highlight-content">
                 <h3 className="highlight-title">Most Viewed Post</h3>
                 <p className="highlight-value">
-                  {highlights.most_viewed_count.toLocaleString()} views
+                  <NumberWithTooltip
+                    value={highlights.most_viewed_count}
+                    suffix=" views"
+                  />
                 </p>
                 <p className="highlight-meta">
                   Post ID: {highlights.most_viewed_id}
@@ -126,7 +193,10 @@ const ResultsPage = ({ data }) => {
               <div className="highlight-content">
                 <h3 className="highlight-title">Most Discussed</h3>
                 <p className="highlight-value">
-                  {highlights.most_commented_count} comments
+                  <NumberWithTooltip
+                    value={highlights.most_commented_count}
+                    suffix=" comments"
+                  />
                 </p>
                 <p className="highlight-meta">
                   Post ID: {highlights.most_commented_id}
@@ -149,7 +219,9 @@ const ResultsPage = ({ data }) => {
               <div className="highlight-icon">↗️</div>
               <div className="highlight-content">
                 <h3 className="highlight-title">Total Forwards</h3>
-                <p className="highlight-value">{totals.total_forwards}</p>
+                <p className="highlight-value">
+                  <NumberWithTooltip value={totals.total_forwards} />
+                </p>
                 <p className="highlight-meta">Times your content was shared</p>
               </div>
             </div>
@@ -158,19 +230,26 @@ const ResultsPage = ({ data }) => {
 
         {/* Top Reactions */}
         <section className="reactions-section glass-card">
-          <h2 className="section-title">Top Reactions</h2>
-          <p className="section-subtitle">
-            How your audience reacted to your content
-          </p>
+          <div className="section-header">
+            <h2 className="section-title">💝 Audience Reactions</h2>
+            <p className="section-description">
+              The emotions your content sparked in your community
+            </p>
+          </div>
           <div className="reactions-grid">
             {topReactions.map(([emoji, count], index) => (
               <div
                 key={emoji}
                 className="reaction-item"
-                style={{ animationDelay: `${index * 0.05}s` }}
+                style={{
+                  animationDelay: `${index * 0.05}s`,
+                  "--animation-delay": `${index * 0.3}s`,
+                }}
               >
                 <span className="reaction-emoji">{emoji}</span>
-                <span className="reaction-count">{count.toLocaleString()}</span>
+                <span className="reaction-count">
+                  <NumberWithTooltip value={count} />
+                </span>
               </div>
             ))}
           </div>

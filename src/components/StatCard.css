@@ -5,9 +5,45 @@
     position: relative;
     overflow: hidden;
     width: 100%;
-    /* Fill grid cell */
 }
 
+/* Animated gradient border */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, 
+        rgba(0, 212, 255, 0.5) 0%,
+        rgba(0, 255, 204, 0.3) 25%,
+        rgba(124, 58, 237, 0.3) 50%,
+        rgba(0, 212, 255, 0.5) 100%
+    );
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Glow effect on hover */
 .stat-card::after {
     content: '';
     position: absolute;
@@ -15,21 +51,21 @@
     right: -50%;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.5s ease;
+    pointer-events: none;
 }
 
 .stat-card:hover::after {
     opacity: 1;
-    animation: rotate 10s linear infinite;
+    animation: rotateGlow 10s linear infinite;
 }
 
-@keyframes rotate {
+@keyframes rotateGlow {
     from {
         transform: rotate(0deg);
     }
-
     to {
         transform: rotate(360deg);
     }
@@ -43,19 +79,18 @@
 .stat-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
-    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.4));
+    animation: iconFloat 3s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
 }
 
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
     }
-
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-8px) scale(1.05);
     }
 }
 
@@ -63,15 +98,36 @@
     text-align: center;
     position: relative;
     z-index: 1;
+    width: 100%;
+    overflow: hidden;
 }
 
 .stat-value {
-    font-size: clamp(1rem, 5vw, 3rem);
+    font-size: clamp(1.1rem, 4vw, 2.5rem);
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 0.5rem;
     position: relative;
     letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 50%, var(--color-secondary) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: valueShine 4s ease-in-out infinite;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    padding: 0 0.25rem;
+}
+
+@keyframes valueShine {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .stat-value::after {
@@ -80,23 +136,141 @@
     bottom: -4px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
+    width: 40px;
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
-    opacity: 0.5;
+    opacity: 0.6;
+    border-radius: var(--radius-full);
 }
 
 .stat-title {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: var(--font-size-sm);
+    letter-spacing: 0.08em;
 }
 
 .stat-subtitle {
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     margin-top: 0.25rem;
+}
+
+/* Tooltip for exact values */
+.stat-value {
+    position: relative;
+    cursor: default;
+}
+
+.stat-exact-tooltip {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    padding: 0.75rem 1rem;
+    background: linear-gradient(145deg, 
+        rgba(5, 10, 25, 0.98) 0%, 
+        rgba(15, 25, 45, 0.96) 100%
+    );
+    border: 1.5px solid rgba(0, 212, 255, 0.5);
+    border-radius: var(--radius-xl);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    box-shadow: 
+        0 15px 50px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(0, 212, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 212, 255, 0.2);
+    -webkit-text-fill-color: #fff;
+    background-clip: padding-box;
+    pointer-events: none;
+    backdrop-filter: blur(15px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Animated shimmer effect */
+.stat-exact-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+    animation: tooltipShimmer 2s linear infinite;
+}
+
+@keyframes tooltipShimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Tooltip arrow with gradient */
+.stat-exact-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: rgba(0, 212, 255, 0.5);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.stat-value:hover .stat-exact-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1);
+    animation: tooltipBounce 0.5s ease-out;
+}
+
+.tooltip-label {
+    display: block;
+    font-size: 0.65rem;
+    color: rgba(0, 212, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.tooltip-number {
+    display: block;
+    font-size: 0.9rem;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes tooltipBounce {
+    0% {
+        transform: translateX(-50%) scale(0.7) translateY(10px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.08) translateY(-2px);
+    }
+    100% {
+        transform: translateX(-50%) scale(1) translateY(0);
+        opacity: 1;
+    }
 }

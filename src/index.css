@@ -145,23 +145,25 @@ h6 {
   }
 }
 
-/* Glassmorphism Card */
+/* Glassmorphism Card - Enhanced Futuristic */
 .glass-card {
   background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.08) 0%,
       rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
-  transition: all var(--transition-base) var(--ease-out);
+  transition: all 0.4s cubic-bezier(0.33, 1, 0.68, 1);
   position: relative;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Animated gradient border on hover */
 .glass-card::before {
   content: '';
   position: absolute;
@@ -169,26 +171,67 @@ h6 {
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.3) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      transparent 100%);
+      rgba(0, 212, 255, 0.4) 0%,
+      rgba(0, 255, 204, 0.2) 25%,
+      rgba(124, 58, 237, 0.2) 50%,
+      rgba(0, 212, 255, 0.4) 100%);
+  background-size: 400% 400%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glass-card:hover::before {
+  opacity: 1;
+  animation: borderGlow 4s ease infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Corner accents */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(0, 212, 255, 0.5) 20%,
+    rgba(0, 255, 204, 0.5) 80%,
+    transparent
+  );
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
 }
 
 .glass-card:hover {
   background: linear-gradient(135deg,
       rgba(255, 255, 255, 0.12) 0%,
       rgba(255, 255, 255, 0.04) 100%);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-6px);
   box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(0, 212, 255, 0.15),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(0, 212, 255, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-card:hover::after {
+  opacity: 1;
 }
 
 /* Button Styles */
