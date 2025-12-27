@@ -1,27 +1,34 @@
-import { useRef, useEffect } from 'react';
-import ProfileAvatar from '../components/ProfileAvatar';
-import StatCard from '../components/StatCard';
-import HeatMap from '../components/HeatMap';
-import MonthlyChart from '../components/MonthlyChart';
-import './ResultsPage.css';
+import { useRef, useEffect } from "react";
+import ProfileAvatar from "../components/ProfileAvatar";
+import StatCard from "../components/StatCard";
+import HeatMap from "../components/HeatMap";
+import MonthlyChart from "../components/MonthlyChart";
+import { API_BASE_URL } from "../services/api";
+import "./ResultsPage.css";
 
 const ResultsPage = ({ data }) => {
-  const { channel_name, totals, trends, highlights } = data;
+  const { channel_name, channel_profile, totals, trends, highlights } = data;
 
   // Top reactions
   const topReactions = Object.entries(highlights.reactions_by_type)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
 
+  // Construct full profile photo URL if channel_profile exists
+  const profilePhotoUrl = channel_profile
+    ? `${API_BASE_URL}${channel_profile}`
+    : null;
+
   return (
     <div className="results-page">
       <div className="gradient-bg"></div>
-      
+
       <div className="results-container">
         {/* Header */}
         <div className="results-header animate-fade-in">
-          <ProfileAvatar 
-            channelName={channel_name} 
+          <ProfileAvatar
+            src={profilePhotoUrl}
+            channelName={channel_name}
             size="medium"
           />
           <div>
@@ -34,25 +41,25 @@ const ResultsPage = ({ data }) => {
         <section className="stats-section">
           <h2 className="section-title">Overall Performance</h2>
           <div className="stats-grid">
-            <StatCard 
+            <StatCard
               title="Total Views"
               value={totals.total_views}
               icon="👀"
               delay={0}
             />
-            <StatCard 
+            <StatCard
               title="Total Posts"
               value={totals.total_posts}
               icon="📝"
               delay={100}
             />
-            <StatCard 
+            <StatCard
               title="Total Reactions"
               value={totals.total_reactions}
               icon="❤️"
               delay={200}
             />
-            <StatCard 
+            <StatCard
               title="Total Comments"
               value={totals.total_comments}
               icon="💬"
@@ -72,7 +79,7 @@ const ResultsPage = ({ data }) => {
 
         {/* Monthly Views Chart */}
         <section className="visualization-section glass-card">
-          <MonthlyChart 
+          <MonthlyChart
             data={trends.views_by_month}
             title="Views by Month"
             type="views"
@@ -81,7 +88,7 @@ const ResultsPage = ({ data }) => {
 
         {/* Monthly Posts Chart */}
         <section className="visualization-section glass-card">
-          <MonthlyChart 
+          <MonthlyChart
             data={trends.posts_by_month}
             title="Posts by Month"
             type="posts"
@@ -108,7 +115,9 @@ const ResultsPage = ({ data }) => {
                 <p className="highlight-value">
                   {highlights.most_viewed_count.toLocaleString()} views
                 </p>
-                <p className="highlight-meta">Post ID: {highlights.most_viewed_id}</p>
+                <p className="highlight-meta">
+                  Post ID: {highlights.most_viewed_id}
+                </p>
               </div>
             </div>
 
@@ -119,7 +128,9 @@ const ResultsPage = ({ data }) => {
                 <p className="highlight-value">
                   {highlights.most_commented_count} comments
                 </p>
-                <p className="highlight-meta">Post ID: {highlights.most_commented_id}</p>
+                <p className="highlight-meta">
+                  Post ID: {highlights.most_commented_id}
+                </p>
               </div>
             </div>
 
@@ -138,9 +149,7 @@ const ResultsPage = ({ data }) => {
               <div className="highlight-icon">↗️</div>
               <div className="highlight-content">
                 <h3 className="highlight-title">Total Forwards</h3>
-                <p className="highlight-value">
-                  {totals.total_forwards}
-                </p>
+                <p className="highlight-value">{totals.total_forwards}</p>
                 <p className="highlight-meta">Times your content was shared</p>
               </div>
             </div>
@@ -155,8 +164,8 @@ const ResultsPage = ({ data }) => {
           </p>
           <div className="reactions-grid">
             {topReactions.map(([emoji, count], index) => (
-              <div 
-                key={emoji} 
+              <div
+                key={emoji}
                 className="reaction-item"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >

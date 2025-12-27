@@ -1,15 +1,16 @@
-import './ProfileAvatar.css';
+import React from "react";
+import "./ProfileAvatar.css";
 
-const ProfileAvatar = ({ 
-  src, 
-  alt, 
-  channelName, 
-  size = 'large',
-  showOverlay = false 
+const ProfileAvatar = ({
+  src,
+  alt,
+  channelName,
+  size = "large",
+  showOverlay = false,
 }) => {
   // Generate a color based on channel name for fallback
   const getColorFromName = (name) => {
-    if (!name) return '#00d4ff';
+    if (!name) return "#00d4ff";
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -21,18 +22,22 @@ const ProfileAvatar = ({
   const fallbackColor = getColorFromName(channelName);
   const initials = channelName
     ? channelName.substring(0, 2).toUpperCase()
-    : '??';
+    : "??";
+
+  const [imageError, setImageError] = React.useState(false);
 
   return (
     <div className={`profile-avatar avatar-${size}`}>
       <div className="avatar-glow" style={{ background: fallbackColor }}></div>
-      {src ? (
-        <img src={src} alt={alt || channelName} className="avatar-img" />
+      {src && !imageError ? (
+        <img
+          src={src}
+          alt={alt || channelName}
+          className="avatar-img"
+          onError={() => setImageError(true)}
+        />
       ) : (
-        <div 
-          className="avatar-fallback" 
-          style={{ background: fallbackColor }}
-        >
+        <div className="avatar-fallback" style={{ background: fallbackColor }}>
           {initials}
         </div>
       )}

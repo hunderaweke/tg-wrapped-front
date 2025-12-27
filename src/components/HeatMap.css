@@ -145,10 +145,25 @@
     font-size: 13px;
 }
 
-.heatmap-tooltip.github-tooltip span {
+.heatmap-tooltip.github-tooltip span,
+.heatmap-tooltip.hourly-tooltip span {
     font-size: 11px;
     opacity: 0.85;
     font-weight: 400;
+}
+
+.heatmap-tooltip.hourly-tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    bottom: 110%;
+}
+
+.heatmap-tooltip.hourly-tooltip strong {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 13px;
 }
 
 .heatmap-tooltip::after {

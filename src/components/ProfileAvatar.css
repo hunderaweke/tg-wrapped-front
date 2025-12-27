@@ -1,6 +1,8 @@
 .profile-avatar {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .avatar-small {
@@ -23,13 +25,14 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 140%;
-    height: 140%;
+    width: 120%;
+    height: 120%;
     border-radius: 50%;
-    filter: blur(30px);
-    opacity: 0.4;
+    filter: blur(20px);
+    opacity: 0.3;
     z-index: 0;
-    animation: pulse 3s ease-in-out infinite;
+    animation: avatar-pulse 3s ease-in-out infinite;
+    pointer-events: none;
 }
 
 .avatar-img,
@@ -39,8 +42,9 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--color-card-border);
+    border: 3px solid rgba(255, 255, 255, 0.15);
     z-index: 1;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .avatar-fallback {
@@ -52,28 +56,108 @@
     color: white;
 }
 
+.avatar-small .avatar-fallback {
+    font-size: 1.25rem;
+}
+
+.avatar-medium .avatar-fallback {
+    font-size: 1.75rem;
+}
+
 .avatar-overlay {
     position: absolute;
-    top: -10px;
-    right: -10px;
+    top: -8px;
+    right: -8px;
     z-index: 2;
 }
 
 .santa-hat {
-    font-size: 2rem;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    font-size: 1.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-@keyframes pulse {
+.avatar-large .santa-hat {
+    font-size: 2rem;
+}
 
+@keyframes avatar-pulse {
     0%,
     100% {
-        opacity: 0.4;
+        opacity: 0.3;
         transform: translate(-50%, -50%) scale(1);
     }
 
     50% {
-        opacity: 0.6;
-        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .avatar-large {
+        width: 100px;
+        height: 100px;
+    }
+
+    .avatar-medium {
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-large .santa-hat {
+        font-size: 1.75rem;
+    }
+
+    .avatar-glow {
+        filter: blur(15px);
+    }
+}
+
+@media (max-width: 480px) {
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-medium {
+        width: 60px;
+        height: 60px;
+    }
+
+    .avatar-small {
+        width: 48px;
+        height: 48px;
+    }
+
+    .avatar-img,
+    .avatar-fallback {
+        border-width: 2px;
+    }
+
+    .avatar-large .avatar-fallback {
+        font-size: 1.5rem;
+    }
+
+    .avatar-medium .avatar-fallback {
+        font-size: 1.25rem;
+    }
+
+    .santa-hat {
+        font-size: 1.25rem;
+    }
+
+    .avatar-large .santa-hat {
+        font-size: 1.5rem;
+    }
+
+    .avatar-overlay {
+        top: -6px;
+        right: -6px;
+    }
+
+    .avatar-glow {
+        filter: blur(12px);
+        opacity: 0.25;
     }
 }

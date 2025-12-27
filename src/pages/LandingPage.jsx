@@ -1,23 +1,26 @@
-import ProfileAvatar from '../components/ProfileAvatar';
-import Button from '../components/Button';
-import './LandingPage.css';
+import ProfileAvatar from "../components/ProfileAvatar";
+import Button from "../components/Button";
+import "./LandingPage.css";
 
-const LandingPage = ({ channelName, onContinue }) => {
+const LandingPage = ({ channelName, channelProfile, onContinue }) => {
   return (
     <div className="page">
       <div className="gradient-bg"></div>
-      
+
       <div className="landing-page-content">
         {/* Profile Section */}
         <div className="profile-section">
-          <ProfileAvatar 
-            channelName={channelName} 
+          <ProfileAvatar
+            src={channelProfile}
+            channelName={channelName}
             size="large"
             showOverlay={true}
           />
           <div className="channel-info">
             <h2 className="channel-name">{channelName}</h2>
-            <p className="channel-handle">@{channelName.toLowerCase().replace(/\s+/g, '')}</p>
+            <p className="channel-handle">
+              @{channelName.toLowerCase().replace(/\s+/g, "")}
+            </p>
           </div>
         </div>
 
@@ -29,7 +32,11 @@ const LandingPage = ({ channelName, onContinue }) => {
 
         {/* Tagline */}
         <p className="tagline">
-          Here's how <span className="highlight">@{channelName.toLowerCase().replace(/\s+/g, '')}</span> performed this year!
+          Here's how{" "}
+          <span className="highlight">
+            @{channelName.toLowerCase().replace(/\s+/g, "")}
+          </span>{" "}
+          performed this year!
         </p>
 
         {/* CTA Button */}
