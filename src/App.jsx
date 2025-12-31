@@ -15,6 +15,16 @@ function App() {
   const [error, setError] = useState(null);
   const [useMockData, setUseMockData] = useState(false);
 
+  // Auto-dismiss error after 8 seconds
+  useState(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleUsernameSubmit = async (username) => {
     setCurrentPage("loading");
     setError(null);
@@ -88,8 +98,17 @@ function App() {
 
       {error && (
         <div className="error-toast">
-          <span>⚠️</span>
-          <p>{error}</p>
+          <span className="error-icon">⚠️</span>
+          <div className="error-content">
+            <p className="error-message">{error}</p>
+          </div>
+          <button
+            className="error-close"
+            onClick={() => setError(null)}
+            aria-label="Close error"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>

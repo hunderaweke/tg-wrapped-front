@@ -4,7 +4,6 @@ import StatCard from "../components/StatCard";
 import HeatMap from "../components/HeatMap";
 import MonthlyChart from "../components/MonthlyChart";
 import { API_BASE_URL } from "../services/api";
-import html2canvas from "html2canvas";
 import "./ResultsPage.css";
 
 // Format large numbers with K, M, B suffixes
@@ -46,8 +45,6 @@ const NumberWithTooltip = ({ value, suffix = "" }) => {
 };
 
 const ResultsPage = ({ data }) => {
-  const [isExporting, setIsExporting] = useState(false);
-
   // Ensure data exists with default values
   if (!data) {
     return (
@@ -74,72 +71,6 @@ const ResultsPage = ({ data }) => {
     ? `${API_BASE_URL}${channel_profile}`
     : null;
 
-  // Export as PNG function - exports each section separately
-  const handleExportPNG = async () => {
-    setIsExporting(true);
-    try {
-      // Hide tooltips during capture
-      const tooltips = document.querySelectorAll(".exact-tooltip");
-      tooltips.forEach((tooltip) => (tooltip.style.display = "none"));
-
-      // Define sections to capture
-      const sections = [
-        { selector: ".results-header", name: "01_header" },
-        { selector: ".stats-section", name: "02_overall_performance" },
-        { selector: ".top-posts-section", name: "03_top_posts" },
-        { selector: ".heatmap-section", name: "04_activity_patterns" },
-        { selector: ".monthly-section", name: "05_monthly_trends" },
-        { selector: ".highlights-section", name: "06_highlights" },
-        { selector: ".reactions-section", name: "07_most_used_reactions" },
-      ];
-
-      const timestamp = new Date().toISOString().split("T")[0];
-      const channelPrefix = channel_name.replace(/[^a-zA-Z0-9]/g, "_");
-
-      // Capture each section
-      for (const section of sections) {
-        const element = document.querySelector(section.selector);
-        if (!element) continue;
-
-        // Add temporary background for proper color capture
-        const originalBg = element.style.background;
-        element.style.background = "#0a0a1a";
-
-        const canvas = await html2canvas(element, {
-          backgroundColor: "#0a0a1a",
-          scale: 2,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-          windowWidth: element.scrollWidth,
-          windowHeight: element.scrollHeight,
-        });
-
-        // Restore original background
-        element.style.background = originalBg;
-
-        // Download the image
-        const link = document.createElement("a");
-        link.download = `${channelPrefix}_${section.name}_${timestamp}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-        // Small delay between downloads to ensure they all work
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
-
-      // Show tooltips again
-      tooltips.forEach((tooltip) => (tooltip.style.display = ""));
-
-      alert(`Successfully exported ${sections.length} images!`);
-    } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export images. Please try again.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <div className="results-page">
       <div className="gradient-bg"></div>
@@ -158,23 +89,6 @@ const ResultsPage = ({ data }) => {
               <p className="channel-subtitle">Your Channel, Unwrapped</p>
             </div>
           </div>
-          <button
-            className="export-button"
-            onClick={handleExportPNG}
-            disabled={isExporting}
-          >
-            {isExporting ? (
-              <>
-                <span className="export-spinner"></span>
-                Exporting sections...
-              </>
-            ) : (
-              <>
-                <span className="export-icon">📥</span>
-                Export as PNG (7 images)
-              </>
-            )}
-          </button>
         </div>
 
         {/* Total Stats Grid */}

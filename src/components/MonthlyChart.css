@@ -110,7 +110,7 @@
 .chart-y-axis {
   position: absolute;
   left: var(--spacing-lg);
-  top: 140px;
+  top: 200px;
   bottom: 80px;
   display: flex;
   flex-direction: column;
@@ -155,7 +155,7 @@
 .chart-area {
   position: relative;
   margin-left: 70px;
-  height: 280px;
+  height: 350px;
   z-index: 2;
 }
 
