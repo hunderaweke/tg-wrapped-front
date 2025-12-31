@@ -48,6 +48,9 @@
     font-style: normal;
 }
 
+/* Google Sans Font */
+@import url('https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap');
+
 @font-face {
     font-family: 'Lufga';
     src: url('/src/assets/fonts/Fontspring-DEMO-lufga-thin.otf') format('opentype');

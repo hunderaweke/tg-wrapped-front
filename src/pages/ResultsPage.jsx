@@ -1,9 +1,10 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import ProfileAvatar from "../components/ProfileAvatar";
 import StatCard from "../components/StatCard";
 import HeatMap from "../components/HeatMap";
 import MonthlyChart from "../components/MonthlyChart";
 import { API_BASE_URL } from "../services/api";
+import html2canvas from "html2canvas";
 import "./ResultsPage.css";
 
 // Format large numbers with K, M, B suffixes
@@ -45,6 +46,22 @@ const NumberWithTooltip = ({ value, suffix = "" }) => {
 };
 
 const ResultsPage = ({ data }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Ensure data exists with default values
+  if (!data) {
+    return (
+      <div className="results-page">
+        <div className="gradient-bg"></div>
+        <div className="results-container">
+          <p style={{ color: "white", textAlign: "center", padding: "2rem" }}>
+            No data available
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const { channel_name, channel_profile, totals, trends, highlights } = data;
 
   // Top reactions
@@ -57,6 +74,72 @@ const ResultsPage = ({ data }) => {
     ? `${API_BASE_URL}${channel_profile}`
     : null;
 
+  // Export as PNG function - exports each section separately
+  const handleExportPNG = async () => {
+    setIsExporting(true);
+    try {
+      // Hide tooltips during capture
+      const tooltips = document.querySelectorAll(".exact-tooltip");
+      tooltips.forEach((tooltip) => (tooltip.style.display = "none"));
+
+      // Define sections to capture
+      const sections = [
+        { selector: ".results-header", name: "01_header" },
+        { selector: ".stats-section", name: "02_overall_performance" },
+        { selector: ".top-posts-section", name: "03_top_posts" },
+        { selector: ".heatmap-section", name: "04_activity_patterns" },
+        { selector: ".monthly-section", name: "05_monthly_trends" },
+        { selector: ".highlights-section", name: "06_highlights" },
+        { selector: ".reactions-section", name: "07_most_used_reactions" },
+      ];
+
+      const timestamp = new Date().toISOString().split("T")[0];
+      const channelPrefix = channel_name.replace(/[^a-zA-Z0-9]/g, "_");
+
+      // Capture each section
+      for (const section of sections) {
+        const element = document.querySelector(section.selector);
+        if (!element) continue;
+
+        // Add temporary background for proper color capture
+        const originalBg = element.style.background;
+        element.style.background = "#0a0a1a";
+
+        const canvas = await html2canvas(element, {
+          backgroundColor: "#0a0a1a",
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          allowTaint: true,
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight,
+        });
+
+        // Restore original background
+        element.style.background = originalBg;
+
+        // Download the image
+        const link = document.createElement("a");
+        link.download = `${channelPrefix}_${section.name}_${timestamp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        // Small delay between downloads to ensure they all work
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      // Show tooltips again
+      tooltips.forEach((tooltip) => (tooltip.style.display = ""));
+
+      alert(`Successfully exported ${sections.length} images!`);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Failed to export images. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="results-page">
       <div className="gradient-bg"></div>
@@ -64,15 +147,34 @@ const ResultsPage = ({ data }) => {
       <div className="results-container">
         {/* Header */}
         <div className="results-header animate-fade-in">
-          <ProfileAvatar
-            src={profilePhotoUrl}
-            channelName={channel_name}
-            size="medium"
-          />
-          <div>
-            <h1 className="channel-title">{channel_name}</h1>
-            <p className="channel-subtitle">Your Channel, Unwrapped</p>
+          <div className="header-content">
+            <ProfileAvatar
+              src={profilePhotoUrl}
+              channelName={channel_name}
+              size="medium"
+            />
+            <div>
+              <h1 className="channel-title">{channel_name}</h1>
+              <p className="channel-subtitle">Your Channel, Unwrapped</p>
+            </div>
           </div>
+          <button
+            className="export-button"
+            onClick={handleExportPNG}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <>
+                <span className="export-spinner"></span>
+                Exporting sections...
+              </>
+            ) : (
+              <>
+                <span className="export-icon">📥</span>
+                Export as PNG (7 images)
+              </>
+            )}
+          </button>
         </div>
 
         {/* Total Stats Grid */}
@@ -111,8 +213,167 @@ const ResultsPage = ({ data }) => {
           </div>
         </section>
 
+        {/* Most Forwarded From */}
+        {highlights.most_forwarded_source && (
+          <section className="forwarded-section">
+            <div className="section-header">
+              <h2 className="section-title">📤 Most Forwarded From</h2>
+              <p className="section-description">
+                The channel you shared content from the most
+              </p>
+            </div>
+            <div className="forwarded-card glass-card">
+              <div className="forwarded-content">
+                {highlights.most_forwarded_source.profile && (
+                  <ProfileAvatar
+                    src={`${API_BASE_URL}${highlights.most_forwarded_source.profile}`}
+                    channelName={highlights.most_forwarded_source.name}
+                    size="medium"
+                  />
+                )}
+                <div className="forwarded-info">
+                  <h3 className="forwarded-name">
+                    {highlights.most_forwarded_source.name ||
+                      highlights.most_forwarded_source.username}
+                  </h3>
+                  {highlights.most_forwarded_source.username && (
+                    <p className="forwarded-username">
+                      @{highlights.most_forwarded_source.username}
+                    </p>
+                  )}
+                  <div className="forwarded-stat">
+                    <span className="forwarded-count">
+                      {highlights.most_forwarded_source.forwards_count}
+                    </span>
+                    <span className="forwarded-label">posts forwarded</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Top Posts - Most Viewed & Most Commented */}
+        <section className="top-posts-section">
+          <div className="section-header">
+            <h2 className="section-title">🏆 Top Performing Posts</h2>
+            <p className="section-description">
+              Your most engaging content that resonated with the audience
+            </p>
+          </div>
+
+          <div className="top-posts-grid">
+            {/* Most Viewed Post */}
+            {highlights.most_viewed && (
+              <div className="top-post-card glass-card">
+                <div className="top-post-header">
+                  <div
+                    className="top-post-badge"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    }}
+                  >
+                    <span className="badge-icon">👁️</span>
+                    <span className="badge-text">Most Viewed</span>
+                  </div>
+                  <div className="top-post-stats">
+                    <div className="stat-item">
+                      <span className="stat-value">
+                        <NumberWithTooltip
+                          value={highlights.most_viewed.views}
+                        />
+                      </span>
+                      <span className="stat-label">views</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-value">
+                        {highlights.most_viewed.comments}
+                      </span>
+                      <span className="stat-label">comments</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="top-post-content">
+                  <p className="post-text">
+                    {highlights.most_viewed.text.length > 280
+                      ? highlights.most_viewed.text.substring(0, 280) + "..."
+                      : highlights.most_viewed.text}
+                  </p>
+                </div>
+                <div className="top-post-footer">
+                  <span className="post-date">
+                    📅{" "}
+                    {new Date(highlights.most_viewed.date).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      }
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Most Commented Post */}
+            {highlights.most_commented && (
+              <div className="top-post-card glass-card">
+                <div className="top-post-header">
+                  <div
+                    className="top-post-badge"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                    }}
+                  >
+                    <span className="badge-icon">💬</span>
+                    <span className="badge-text">Most Discussed</span>
+                  </div>
+                  <div className="top-post-stats">
+                    <div className="stat-item">
+                      <span className="stat-value">
+                        {highlights.most_commented.comments}
+                      </span>
+                      <span className="stat-label">comments</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-value">
+                        <NumberWithTooltip
+                          value={highlights.most_commented.views}
+                        />
+                      </span>
+                      <span className="stat-label">views</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="top-post-content">
+                  <p className="post-text">
+                    {highlights.most_commented.text.length > 280
+                      ? highlights.most_commented.text.substring(0, 280) + "..."
+                      : highlights.most_commented.text}
+                  </p>
+                </div>
+                <div className="top-post-footer">
+                  <span className="post-date">
+                    📅{" "}
+                    {new Date(
+                      highlights.most_commented.date
+                    ).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Posting Activity Heat Map */}
-        <section className="visualization-section glass-card">
+        <section className="visualization-section glass-card heatmap-section">
           <div className="section-header">
             <h2 className="section-title">📅 Daily Posting Activity</h2>
             <p className="section-description">
@@ -123,7 +384,7 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Monthly Views Chart */}
-        <section className="visualization-section glass-card">
+        <section className="visualization-section glass-card monthly-section">
           <div className="section-header">
             <h2 className="section-title">👁️ Monthly View Trends</h2>
             <p className="section-description">
@@ -138,7 +399,7 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Monthly Posts Chart */}
-        <section className="visualization-section glass-card">
+        <section className="visualization-section glass-card monthly-section">
           <div className="section-header">
             <h2 className="section-title">📊 Monthly Post Volume</h2>
             <p className="section-description">
@@ -163,47 +424,15 @@ const ResultsPage = ({ data }) => {
           <HeatMap data={trends.posts_by_hour} type="hourly" />
         </section>
 
-        {/* Highlights */}
+        {/* More Highlights */}
         <section className="highlights-section">
           <div className="section-header">
-            <h2 className="section-title">✨ Channel Highlights</h2>
+            <h2 className="section-title">✨ More Highlights</h2>
             <p className="section-description">
-              Your standout achievements and milestones
+              Additional achievements and milestones
             </p>
           </div>
           <div className="highlights-grid">
-            <div className="highlight-card glass-card">
-              <div className="highlight-icon">🏆</div>
-              <div className="highlight-content">
-                <h3 className="highlight-title">Most Viewed Post</h3>
-                <p className="highlight-value">
-                  <NumberWithTooltip
-                    value={highlights.most_viewed_count}
-                    suffix=" views"
-                  />
-                </p>
-                <p className="highlight-meta">
-                  Post ID: {highlights.most_viewed_id}
-                </p>
-              </div>
-            </div>
-
-            <div className="highlight-card glass-card">
-              <div className="highlight-icon">💬</div>
-              <div className="highlight-content">
-                <h3 className="highlight-title">Most Discussed</h3>
-                <p className="highlight-value">
-                  <NumberWithTooltip
-                    value={highlights.most_commented_count}
-                    suffix=" comments"
-                  />
-                </p>
-                <p className="highlight-meta">
-                  Post ID: {highlights.most_commented_id}
-                </p>
-              </div>
-            </div>
-
             <div className="highlight-card glass-card">
               <div className="highlight-icon">🔥</div>
               <div className="highlight-content">

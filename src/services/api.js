@@ -7,7 +7,7 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 60000, // 60 seconds for processing
+  timeout: 1200000, // 120 seconds for processing (extended for backend processing time)
 });
 
 // Request interceptor
@@ -29,9 +29,29 @@ apiClient.interceptors.response.use(
     if (error.response) {
       // Server responded with error
       console.error("API Error:", error.response.data);
+
+      // Enhance error message based on status code
+      if (error.response.status === 404) {
+        error.message =
+          "Channel not found. Please check the username and try again.";
+      } else if (error.response.status === 429) {
+        error.message = "Too many requests. Please try again in a few minutes.";
+      } else if (error.response.status === 500) {
+        error.message =
+          "Server error. The backend is having trouble processing your request.";
+      } else if (error.response.status === 503) {
+        error.message =
+          "Service temporarily unavailable. Please try again later.";
+      }
     } else if (error.request) {
       // Request made but no response
       console.error("Network Error:", error.message);
+      error.message =
+        "Cannot connect to server. Please check if the backend is running.";
+    } else if (error.code === "ECONNABORTED") {
+      // Timeout error
+      error.message =
+        "Request timed out. The channel might be too large or the server is busy.";
     } else {
       // Something else happened
       console.error("Error:", error.message);

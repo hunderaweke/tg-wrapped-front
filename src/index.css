@@ -21,7 +21,7 @@
 
   /* Typography */
   --font-heading: 'Lufga', sans-serif;
-  --font-body: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Google Sans',sans-serif;
 
   /* Spacing */
   --spacing-xs: 0.5rem;

@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import Button from '../components/Button';
-import './InputPage.css';
+import { useState } from "react";
+import Button from "../components/Button";
+import "./InputPage.css";
 
 const InputPage = ({ onSubmit }) => {
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Remove @ if user included it
-    const cleanUsername = username.trim().replace('@', '');
+    const cleanUsername = username.trim().replace("@", "");
 
     if (!cleanUsername) {
-      setError('Please enter a channel username');
+      setError("Please enter a channel username");
       return;
     }
 
     if (cleanUsername.length < 3) {
-      setError('Username must be at least 3 characters');
+      setError("Username must be at least 3 characters");
       return;
     }
 
@@ -29,7 +29,7 @@ const InputPage = ({ onSubmit }) => {
   return (
     <div className="page">
       <div className="gradient-bg"></div>
-      
+
       <div className="input-page-content animate-fade-in">
         <div className="branding">
           <h1 className="main-title">
@@ -46,12 +46,12 @@ const InputPage = ({ onSubmit }) => {
             <input
               id="username"
               type="text"
-              className={`input ${error ? 'input-error' : ''}`}
+              className={`input ${error ? "input-error" : ""}`}
               placeholder="e.g. @channelname"
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
-                setError('');
+                setError("");
               }}
               autoFocus
             />
@@ -66,7 +66,7 @@ const InputPage = ({ onSubmit }) => {
             <span className="info-icon">ⓘ</span>
             We access public data from the last 12 months.
             <br />
-            No login required.
+            Processing may take 1-2 minutes. No login required.
           </p>
         </form>
       </div>

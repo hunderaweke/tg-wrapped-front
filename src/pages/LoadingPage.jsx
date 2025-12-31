@@ -5,11 +5,12 @@ const LoadingPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    "Counting posts",
-    "Analyzing views",
-    "Calculating engagement",
+    "Connecting to Telegram",
+    "Fetching channel data",
+    "Analyzing posts & views",
     "Processing reactions",
-    "Generating insights",
+    "Calculating engagement metrics",
+    "Generating your insights",
   ];
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const LoadingPage = () => {
         }
         return prev;
       });
-    }, 2000);
+    }, 3000); // Slower step progression to match backend processing time
 
     return () => clearInterval(interval);
   }, []);
@@ -35,7 +36,7 @@ const LoadingPage = () => {
             Unwrapping your channel...
           </h2>
           <p className="loading-subtitle animate-fade-in">
-            Good things take a moment
+            Analyzing your content. This may take a minute or two.
           </p>
         </div>
 

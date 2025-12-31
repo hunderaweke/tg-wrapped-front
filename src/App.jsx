@@ -29,21 +29,34 @@ function App() {
     }
 
     try {
+      // The backend will take time to process, so we wait for it
       const data = await getChannelAnalytics(username);
+
+      // Validate the response structure
+      if (
+        !data ||
+        !data.channel_name ||
+        !data.totals ||
+        !data.trends ||
+        !data.highlights
+      ) {
+        throw new Error("Invalid response structure from backend");
+      }
+
       setChannelData(data);
 
-      // Show loading for at least 3 seconds for better UX
+      // Show loading for at least 2 seconds for better UX (backend already takes time)
       setTimeout(() => {
         setCurrentPage("landing");
-      }, 3000);
+      }, 2000);
     } catch (err) {
       console.error("Error fetching analytics:", err);
       setError(
         err.response?.data?.message ||
+          err.message ||
           'Failed to fetch channel analytics. Try "demo" to see sample data.'
       );
       setCurrentPage("input");
-      setUseMockData(true); // Enable mock data fallback
     }
   };
 
