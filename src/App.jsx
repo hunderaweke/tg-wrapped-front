@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import InputPage from "./pages/InputPage";
 import LoadingPage from "./pages/LoadingPage";
 import LandingPage from "./pages/LandingPage";
@@ -6,16 +7,17 @@ import ResultsPage from "./pages/ResultsPage";
 import { getChannelAnalytics, API_BASE_URL } from "./services/api";
 import "./App.css";
 
-// Import mock data for demo
 import mockData from "../response.json";
 
-function App() {
-  const [currentPage, setCurrentPage] = useState("input"); // input, loading, landing, results
+function AppContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [currentPage, setCurrentPage] = useState("input");
   const [channelData, setChannelData] = useState(null);
   const [error, setError] = useState(null);
   const [useMockData, setUseMockData] = useState(false);
+  const [hasVisitedLanding, setHasVisitedLanding] = useState(false);
 
-  // Auto-dismiss error after 8 seconds
   useState(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -29,20 +31,18 @@ function App() {
     setCurrentPage("loading");
     setError(null);
 
-    // Use mock data if backend is not available (for demo purposes)
     if (useMockData || username.toLowerCase() === "demo") {
       setTimeout(() => {
         setChannelData(mockData);
         setCurrentPage("landing");
+        navigate("/landing");
       }, 2000);
       return;
     }
 
     try {
-      // The backend will take time to process, so we wait for it
       const data = await getChannelAnalytics(username);
 
-      // Validate the response structure
       if (
         !data ||
         !data.channel_name ||
@@ -55,9 +55,9 @@ function App() {
 
       setChannelData(data);
 
-      // Show loading for at least 2 seconds for better UX (backend already takes time)
       setTimeout(() => {
         setCurrentPage("landing");
+        navigate("/landing");
       }, 2000);
     } catch (err) {
       console.error("Error fetching analytics:", err);
@@ -67,34 +67,68 @@ function App() {
           'Failed to fetch channel analytics. Try "demo" to see sample data.'
       );
       setCurrentPage("input");
+      navigate("/");
     }
   };
 
   const handleContinueToResults = () => {
+    setHasVisitedLanding(true);
     setCurrentPage("results");
+    navigate("/results");
+  };
+
+  const handleBackToHome = () => {
+    setCurrentPage("input");
+    setChannelData(null);
+    setError(null);
+    setHasVisitedLanding(false);
+    navigate("/");
   };
 
   return (
     <div className="app">
-      {currentPage === "input" && <InputPage onSubmit={handleUsernameSubmit} />}
-
-      {currentPage === "loading" && <LoadingPage />}
-
-      {currentPage === "landing" && channelData && (
-        <LandingPage
-          channelName={channelData.channel_name}
-          channelProfile={
-            channelData.channel_profile
-              ? `${API_BASE_URL}${channelData.channel_profile}`
-              : null
+      <Routes>
+        <Route
+          path="/"
+          element={
+            currentPage === "loading" ? (
+              <LoadingPage />
+            ) : (
+              <InputPage onSubmit={handleUsernameSubmit} />
+            )
           }
-          onContinue={handleContinueToResults}
         />
-      )}
-
-      {currentPage === "results" && channelData && (
-        <ResultsPage data={channelData} />
-      )}
+        <Route
+          path="/landing"
+          element={
+            channelData ? (
+              <LandingPage
+                channelName={channelData.channel_name}
+                channelProfile={
+                  channelData.channel_profile
+                    ? `${API_BASE_URL}${channelData.channel_profile}`
+                    : null
+                }
+                onContinue={handleContinueToResults}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/results"
+          element={
+            channelData && hasVisitedLanding ? (
+              <ResultsPage data={channelData} onBack={handleBackToHome} />
+            ) : channelData ? (
+              <Navigate to="/landing" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+      </Routes>
 
       {error && (
         <div className="error-toast">
@@ -112,6 +146,14 @@ function App() {
         </div>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

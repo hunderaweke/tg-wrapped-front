@@ -223,12 +223,11 @@ const HeatMap = ({ data, type = "daily" }) => {
         <div className="heatmap-wrapper">
           {/* Month labels */}
           <div className="month-labels">
-            <div className="day-label-spacer"></div>
             {monthLabels.map(({ week, month }) => (
               <div
                 key={`${month}-${week}`}
                 className="month-label"
-                style={{ gridColumn: week + 2 }}
+                style={{ left: `${week * 17}px` }}
               >
                 {month}
               </div>

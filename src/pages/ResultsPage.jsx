@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { domToPng } from "modern-screenshot";
 import ProfileAvatar from "../components/ProfileAvatar";
 import StatCard from "../components/StatCard";
 import HeatMap from "../components/HeatMap";
@@ -44,8 +45,23 @@ const NumberWithTooltip = ({ value, suffix = "" }) => {
   );
 };
 
-const ResultsPage = ({ data }) => {
-  // Ensure data exists with default values
+const ResultsPage = ({ data, onBack }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadingSection, setDownloadingSection] = useState(null);
+
+  // Refs for each section
+  const landingRef = useRef(null);
+  const statsRef = useRef(null);
+  const forwardedRef = useRef(null);
+  const topPostsRef = useRef(null);
+  const dailyHeatmapRef = useRef(null);
+  const monthlyViewsRef = useRef(null);
+  const monthlyPostsRef = useRef(null);
+  const hourlyRef = useRef(null);
+  const highlightsRef = useRef(null);
+  const reactionsRef = useRef(null);
+
   if (!data) {
     return (
       <div className="results-page">
@@ -61,43 +77,294 @@ const ResultsPage = ({ data }) => {
 
   const { channel_name, channel_profile, totals, trends, highlights } = data;
 
-  // Top reactions
   const topReactions = Object.entries(highlights.reactions_by_type)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
 
-  // Construct full profile photo URL if channel_profile exists
   const profilePhotoUrl = channel_profile
     ? `${API_BASE_URL}${channel_profile}`
     : null;
+
+  const downloadImage = async (element, filename) => {
+    if (!element) return null;
+
+    try {
+      // Pre-process: ensure bars have explicit heights from CSS variable
+      const bars = element.querySelectorAll(".bar");
+      const originalStyles = [];
+
+      bars.forEach((bar) => {
+        // Store original inline styles
+        originalStyles.push({
+          element: bar,
+          height: bar.style.height,
+          transition: bar.style.transition,
+        });
+
+        // Get the --height CSS variable value and apply it directly
+        const heightVar = bar.style.getPropertyValue("--height");
+        if (heightVar) {
+          bar.style.height = heightVar;
+        }
+        // Disable transition to ensure immediate height
+        bar.style.transition = "none";
+      });
+
+      const dataUrl = await domToPng(element, {
+        scale: 2,
+        backgroundColor: "#0a0f1a",
+      });
+
+      // Restore original styles
+      originalStyles.forEach(({ element: el, height, transition }) => {
+        el.style.height = height;
+        el.style.transition = transition;
+      });
+
+      return { dataUrl, filename };
+    } catch (error) {
+      console.error(`Error capturing ${filename}:`, error);
+      return null;
+    }
+  };
+
+  const handleDownloadSection = async (ref, name) => {
+    if (!ref.current) return;
+    setDownloadingSection(name);
+
+    const result = await downloadImage(ref.current, name);
+    if (result) {
+      const link = document.createElement("a");
+      link.download = `${result.filename}.png`;
+      link.href = result.dataUrl;
+      link.click();
+    }
+
+    setDownloadingSection(null);
+  };
+
+  const handleDownloadAll = async () => {
+    setIsDownloading(true);
+    setDownloadProgress(0);
+
+    const sections = [
+      { ref: landingRef, name: `${channel_name}-landing` },
+      { ref: statsRef, name: `${channel_name}-stats` },
+      { ref: forwardedRef, name: `${channel_name}-forwarded` },
+      { ref: topPostsRef, name: `${channel_name}-top-posts` },
+      { ref: dailyHeatmapRef, name: `${channel_name}-daily-activity` },
+      { ref: monthlyViewsRef, name: `${channel_name}-monthly-views` },
+      { ref: monthlyPostsRef, name: `${channel_name}-monthly-posts` },
+      { ref: hourlyRef, name: `${channel_name}-hourly-activity` },
+      { ref: highlightsRef, name: `${channel_name}-highlights` },
+      { ref: reactionsRef, name: `${channel_name}-reactions` },
+    ].filter((section) => section.ref.current);
+
+    const totalSections = sections.length;
+    const images = [];
+
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      const result = await downloadImage(section.ref.current, section.name);
+      if (result) {
+        images.push(result);
+      }
+      setDownloadProgress(Math.round(((i + 1) / totalSections) * 100));
+    }
+
+    // Download all images
+    for (const image of images) {
+      const link = document.createElement("a");
+      link.download = `${image.filename}.png`;
+      link.href = image.dataUrl;
+      link.click();
+      // Small delay between downloads to prevent browser blocking
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
+    setIsDownloading(false);
+    setDownloadProgress(0);
+  };
+
+  const DownloadSectionButton = ({ sectionRef, sectionName }) => (
+    <button
+      className="download-section-button"
+      onClick={() =>
+        handleDownloadSection(sectionRef, `${channel_name}-${sectionName}`)
+      }
+      disabled={downloadingSection === `${channel_name}-${sectionName}`}
+      aria-label={`Download ${sectionName}`}
+      title="Download this section"
+    >
+      {downloadingSection === `${channel_name}-${sectionName}` ? (
+        <svg className="download-spinner" viewBox="0 0 24 24" fill="none">
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeDasharray="32"
+            strokeLinecap="round"
+          />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M7 10L12 15L17 10"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 15V3"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </button>
+  );
 
   return (
     <div className="results-page">
       <div className="gradient-bg"></div>
 
       <div className="results-container">
-        {/* Header */}
-        <div className="results-header animate-fade-in">
-          <div className="header-content">
+        <div className="results-actions">
+          <button
+            className="back-button"
+            onClick={onBack}
+            aria-label="Go back to home"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 12H5M5 12L12 19M5 12L12 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Back</span>
+          </button>
+
+          <button
+            className="download-all-button"
+            onClick={handleDownloadAll}
+            disabled={isDownloading}
+            aria-label="Download all sections as images"
+          >
+            {isDownloading ? (
+              <>
+                <svg
+                  className="download-spinner"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray="32"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span>{downloadProgress}%</span>
+              </>
+            ) : (
+              <>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M7 10L12 15L17 10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12 15V3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Download All</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Landing Preview for Screenshot */}
+        <div ref={landingRef} className="landing-preview screenshot-section">
+          <div className="landing-preview-content">
             <ProfileAvatar
               src={profilePhotoUrl}
               channelName={channel_name}
-              size="medium"
+              size="large"
             />
-            <div>
-              <h1 className="channel-title">{channel_name}</h1>
-              <p className="channel-subtitle">Your Channel, Unwrapped</p>
+            <div className="landing-preview-info">
+              <h2 className="landing-preview-name">{channel_name}</h2>
+              <p className="landing-preview-handle">
+                @{channel_name.toLowerCase().replace(/\s+/g, "")}
+              </p>
             </div>
+            <div className="landing-preview-title">
+              <span className="landing-year">2025</span>
+              <span className="landing-recap">Recap</span>
+            </div>
+            <p className="landing-preview-tagline">
+              Here's how{" "}
+              <span className="highlight">
+                @{channel_name.toLowerCase().replace(/\s+/g, "")}
+              </span>{" "}
+              performed this year!
+            </p>
           </div>
+          <DownloadSectionButton
+            sectionRef={landingRef}
+            sectionName="landing"
+          />
         </div>
 
         {/* Total Stats Grid */}
-        <section className="stats-section">
-          <div className="section-header">
-            <h2 className="section-title">📈 Overall Performance</h2>
-            <p className="section-description">
-              Your channel's key metrics at a glance
-            </p>
+        <section ref={statsRef} className="stats-section screenshot-section">
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">📈 Overall Performance</h2>
+              <p className="section-description">
+                Your channel's key metrics at a glance
+              </p>
+            </div>
+            <DownloadSectionButton sectionRef={statsRef} sectionName="stats" />
           </div>
           <div className="stats-grid">
             <StatCard
@@ -129,12 +396,21 @@ const ResultsPage = ({ data }) => {
 
         {/* Most Forwarded From */}
         {highlights.most_forwarded_source && (
-          <section className="forwarded-section">
-            <div className="section-header">
-              <h2 className="section-title">📤 Most Forwarded From</h2>
-              <p className="section-description">
-                The channel you shared content from the most
-              </p>
+          <section
+            ref={forwardedRef}
+            className="forwarded-section screenshot-section"
+          >
+            <div className="section-header-with-download">
+              <div className="section-header">
+                <h2 className="section-title">📤 Most Forwarded From</h2>
+                <p className="section-description">
+                  The channel you shared content from the most
+                </p>
+              </div>
+              <DownloadSectionButton
+                sectionRef={forwardedRef}
+                sectionName="forwarded"
+              />
             </div>
             <div className="forwarded-card glass-card">
               <div className="forwarded-content">
@@ -168,12 +444,21 @@ const ResultsPage = ({ data }) => {
         )}
 
         {/* Top Posts - Most Viewed & Most Commented */}
-        <section className="top-posts-section">
-          <div className="section-header">
-            <h2 className="section-title">🏆 Top Performing Posts</h2>
-            <p className="section-description">
-              Your most engaging content that resonated with the audience
-            </p>
+        <section
+          ref={topPostsRef}
+          className="top-posts-section screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">🏆 Top Performing Posts</h2>
+              <p className="section-description">
+                Your most engaging content that resonated with the audience
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={topPostsRef}
+              sectionName="top-posts"
+            />
           </div>
 
           <div className="top-posts-grid">
@@ -287,23 +572,41 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Posting Activity Heat Map */}
-        <section className="visualization-section glass-card heatmap-section">
-          <div className="section-header">
-            <h2 className="section-title">📅 Daily Posting Activity</h2>
-            <p className="section-description">
-              Track your content creation journey throughout 2025
-            </p>
+        <section
+          ref={dailyHeatmapRef}
+          className="visualization-section glass-card heatmap-section screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">📅 Daily Posting Activity</h2>
+              <p className="section-description">
+                Track your content creation journey throughout 2025
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={dailyHeatmapRef}
+              sectionName="daily-activity"
+            />
           </div>
           <HeatMap data={trends.posts_by_day} type="daily" />
         </section>
 
         {/* Monthly Views Chart */}
-        <section className="visualization-section glass-card monthly-section">
-          <div className="section-header">
-            <h2 className="section-title">👁️ Monthly View Trends</h2>
-            <p className="section-description">
-              See how your audience engagement evolved each month
-            </p>
+        <section
+          ref={monthlyViewsRef}
+          className="visualization-section glass-card monthly-section screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">👁️ Monthly View Trends</h2>
+              <p className="section-description">
+                See how your audience engagement evolved each month
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={monthlyViewsRef}
+              sectionName="monthly-views"
+            />
           </div>
           <MonthlyChart
             data={trends.views_by_month}
@@ -313,12 +616,21 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Monthly Posts Chart */}
-        <section className="visualization-section glass-card monthly-section">
-          <div className="section-header">
-            <h2 className="section-title">📊 Monthly Post Volume</h2>
-            <p className="section-description">
-              Your content creation frequency across the year
-            </p>
+        <section
+          ref={monthlyPostsRef}
+          className="visualization-section glass-card monthly-section screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">📊 Monthly Post Volume</h2>
+              <p className="section-description">
+                Your content creation frequency across the year
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={monthlyPostsRef}
+              sectionName="monthly-posts"
+            />
           </div>
           <MonthlyChart
             data={trends.posts_by_month}
@@ -328,23 +640,41 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Hourly Posting Pattern */}
-        <section className="visualization-section glass-card">
-          <div className="section-header">
-            <h2 className="section-title">⏰ Peak Activity Hours</h2>
-            <p className="section-description">
-              Discover your optimal posting times throughout the day
-            </p>
+        <section
+          ref={hourlyRef}
+          className="visualization-section glass-card screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">⏰ Peak Activity Hours</h2>
+              <p className="section-description">
+                Discover your optimal posting times throughout the day
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={hourlyRef}
+              sectionName="hourly-activity"
+            />
           </div>
           <HeatMap data={trends.posts_by_hour} type="hourly" />
         </section>
 
         {/* More Highlights */}
-        <section className="highlights-section">
-          <div className="section-header">
-            <h2 className="section-title">✨ More Highlights</h2>
-            <p className="section-description">
-              Additional achievements and milestones
-            </p>
+        <section
+          ref={highlightsRef}
+          className="highlights-section screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">✨ More Highlights</h2>
+              <p className="section-description">
+                Additional achievements and milestones
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={highlightsRef}
+              sectionName="highlights"
+            />
           </div>
           <div className="highlights-grid">
             <div className="highlight-card glass-card">
@@ -372,12 +702,21 @@ const ResultsPage = ({ data }) => {
         </section>
 
         {/* Top Reactions */}
-        <section className="reactions-section glass-card">
-          <div className="section-header">
-            <h2 className="section-title">💝 Audience Reactions</h2>
-            <p className="section-description">
-              The emotions your content sparked in your community
-            </p>
+        <section
+          ref={reactionsRef}
+          className="reactions-section glass-card screenshot-section"
+        >
+          <div className="section-header-with-download">
+            <div className="section-header">
+              <h2 className="section-title">💝 Audience Reactions</h2>
+              <p className="section-description">
+                The emotions your content sparked in your community
+              </p>
+            </div>
+            <DownloadSectionButton
+              sectionRef={reactionsRef}
+              sectionName="reactions"
+            />
           </div>
           <div className="reactions-grid">
             {topReactions.map(([emoji, count], index) => (

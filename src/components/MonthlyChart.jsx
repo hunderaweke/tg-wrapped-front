@@ -94,97 +94,92 @@ const MonthlyChart = ({ data, title, type = "views" }) => {
         </div>
       </div>
 
-      {/* Y-Axis Labels */}
-      <div className="chart-y-axis">
-        {[100, 75, 50, 25, 0].map((percent) => (
-          <div key={percent} className="y-axis-label">
-            <span>
-              {Math.round((stats.maxValue * percent) / 100).toLocaleString()}
-            </span>
-            <div className="y-axis-line"></div>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart Area */}
-      <div className="chart-area">
-        {/* Background Grid */}
-        <div className="chart-grid">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="grid-row"></div>
+      <div className="chart-wrapper">
+        <div className="chart-y-axis">
+          {[100, 75, 50, 25, 0].map((percent) => (
+            <div key={percent} className="y-axis-label">
+              <span>
+                {Math.round((stats.maxValue * percent) / 100).toLocaleString()}
+              </span>
+            </div>
           ))}
         </div>
 
-        {/* Bars Container */}
-        <div className="bars-container">
-          {entries.map(([month, value], index) => {
-            const monthName = month.split("-")[1];
-            const shortMonth = monthName.substring(0, 3);
-            const heightPercent = (value / stats.maxValue) * 100;
-            const isHovered = hoveredBar === index;
-            const isPeak = value === stats.maxValue;
+        <div className="chart-area">
+          <div className="chart-grid">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="grid-line"></div>
+            ))}
+          </div>
 
-            return (
-              <div
-                key={month}
-                className={`bar-column ${isHovered ? "hovered" : ""} ${
-                  isPeak ? "peak" : ""
-                }`}
-                onMouseEnter={() => setHoveredBar(index)}
-                onMouseLeave={() => setHoveredBar(null)}
-                style={{ "--delay": `${index * 60}ms` }}
-              >
-                {/* Bar Group */}
-                <div className="bar-group">
-                  {/* Background Track */}
-                  <div className="bar-track"></div>
+          <div className="bars-container">
+            {entries.map(([month, value], index) => {
+              const monthName = month.split("-")[1];
+              const shortMonth = monthName.substring(0, 3);
+              const heightPercent = (value / stats.maxValue) * 100;
+              const isHovered = hoveredBar === index;
+              const isPeak = value === stats.maxValue;
 
-                  {/* Main Bar */}
-                  <div
-                    className="bar"
-                    style={{
-                      "--height": `${heightPercent}%`,
-                      background: getBarColor(value, index, isHovered),
-                    }}
-                  >
-                    {/* Inner Glow */}
-                    <div className="bar-inner-glow"></div>
+              return (
+                <div
+                  key={month}
+                  className={`bar-column ${isHovered ? "hovered" : ""} ${
+                    isPeak ? "peak" : ""
+                  }`}
+                  onMouseEnter={() => setHoveredBar(index)}
+                  onMouseLeave={() => setHoveredBar(null)}
+                  style={{ "--delay": `${index * 60}ms` }}
+                >
+                  {/* Bar Group */}
+                  <div className="bar-group">
+                    {/* Background Track */}
+                    <div className="bar-track"></div>
 
-                    {/* Reflection */}
-                    <div className="bar-reflection"></div>
+                    {/* Main Bar */}
+                    <div
+                      className="bar"
+                      style={{
+                        "--height": `${heightPercent}%`,
+                        background: getBarColor(value, index, isHovered),
+                      }}
+                    >
+                      {/* Inner Glow */}
+                      <div className="bar-inner-glow"></div>
 
-                    {/* Top Cap */}
-                    <div className="bar-cap">
-                      <div className="cap-shine"></div>
+                      {/* Reflection */}
+                      <div className="bar-reflection"></div>
+
+                      {/* Top Cap */}
+                      <div className="bar-cap">
+                        <div className="cap-shine"></div>
+                      </div>
+                    </div>
+
+                    {/* Value Popup */}
+                    <div className={`value-popup ${isHovered ? "show" : ""}`}>
+                      <div className="popup-content">
+                        <span className="popup-value">
+                          {value.toLocaleString()}
+                        </span>
+                        <span className="popup-type">
+                          {type === "views" ? "views" : "posts"}
+                        </span>
+                      </div>
+                      <div className="popup-arrow"></div>
                     </div>
                   </div>
 
-                  {/* Value Popup */}
-                  <div className={`value-popup ${isHovered ? "show" : ""}`}>
-                    <div className="popup-content">
-                      <span className="popup-value">
-                        {value.toLocaleString()}
-                      </span>
-                      <span className="popup-type">
-                        {type === "views" ? "views" : "posts"}
-                      </span>
-                    </div>
-                    <div className="popup-arrow"></div>
+                  <div className="month-label">
+                    <span>{shortMonth}</span>
+                    {isPeak && <span className="peak-indicator">★</span>}
                   </div>
                 </div>
-
-                {/* Month Label */}
-                <div className="month-label">
-                  <span>{shortMonth}</span>
-                  {isPeak && <span className="peak-indicator">★</span>}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Accent */}
       <div className="chart-bottom-accent">
         <div className="accent-line"></div>
         <div className="accent-dots">

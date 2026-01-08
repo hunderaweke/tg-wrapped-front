@@ -34,6 +34,7 @@ const ProfileAvatar = ({
           src={src}
           alt={alt || channelName}
           className="avatar-img"
+          crossOrigin="anonymous"
           onError={() => setImageError(true)}
         />
       ) : (
